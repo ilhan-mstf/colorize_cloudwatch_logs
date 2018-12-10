@@ -1,0 +1,16 @@
+{
+  "name": "Colorize Cloudwatch Log",
+  "description" : "Easily recognize start and end of the same event's logs.",
+  "version": "0.1",
+  "manifest_version": 2,
+  "browser_action": {
+    "default_popup": "hello.html",
+    "default_icon": "logo.png"
+  },
+  "content_scripts": [{
+    "matches": [
+      "https://*.console.aws.amazon.com/cloudwatch/*"
+    ],
+    "js": ["colorize.js"]
+  }]
+}
