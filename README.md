@@ -9,6 +9,6 @@ It doesn't collect any user data and it is free to use.
 
 This extension only runs on Amazon Cloudwatch Logs webpage.
 
-Overhead is very low, colorize operation takes 9 milliseconds, listen operation for new eevnt logs takes 0.4 milliseconds in every second.
+Overhead is very low, colorize operation takes 9 milliseconds, listen operation for new event logs takes 0.4 milliseconds in every second.
 
 Contributions are welcome. Please obey standart.js convention if you are thinking to contribute.
