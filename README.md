@@ -1,7 +1,7 @@
 Colorize Cloudwatch Logs
 ========================
 
-This is a Google Chrome extension. You can install this extendion form this address: [Chrome Web Store](https://chrome.google.com/webstore/detail/colorize-cloudwatch-logs/fkagnmcbeokmapmcbecbcmpccmlbhkpl).
+This is a Google Chrome extension. You can install this extension from this address: [Chrome Web Store](https://chrome.google.com/webstore/detail/colorize-cloudwatch-logs/fkagnmcbeokmapmcbecbcmpccmlbhkpl).
 
 The purpose of this extension is to recognize easily the boundaries of Amazon Lambda event's log by setting a different background color of logs belongs to the same event.
 
