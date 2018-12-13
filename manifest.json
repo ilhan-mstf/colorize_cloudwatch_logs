@@ -1,16 +1,24 @@
 {
-  "name": "Colorize Cloudwatch Log",
-  "description" : "Easily recognize start and end of the same event's logs.",
+  "name": "Colorize Cloudwatch Logs",
+  "description" : "Easily recognize start and end of the same lambda event's logs.",
   "version": "0.1",
   "manifest_version": 2,
+  "icons": {
+    "16": "logo_16.png",
+    "32": "logo_32.png",
+    "64": "logo_64.png",
+    "128": "logo_128.png"
+  },
   "browser_action": {
     "default_popup": "hello.html",
-    "default_icon": "logo.png"
+    "default_icon": "logo_16.png"
   },
   "content_scripts": [{
     "matches": [
       "https://*.console.aws.amazon.com/cloudwatch/*"
     ],
-    "js": ["colorize.js"]
+    "js": [
+      "colorize.js"
+    ]
   }]
 }
