@@ -18,6 +18,7 @@
       "https://*.console.aws.amazon.com/cloudwatch/*"
     ],
     "js": [
+      "lib/ainsi_up.js",
       "colorize.js"
     ]
   }]
