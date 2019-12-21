@@ -3,7 +3,7 @@ Colorize CloudWatch Logs
 
 This is a Google Chrome extension. You can install this extension by this address: [Chrome Web Store](https://chrome.google.com/webstore/detail/colorize-cloudwatch-logs/fkagnmcbeokmapmcbecbcmpccmlbhkpl).
 
-The purpose of this extension is to group visually the logs on AWS CloudWatch. There are three rules:
+The purpose of this extension is to group visually logs on AWS CloudWatch. There are three rules:
 - Set a different background color for each log group of AWS Lambda invocation. Therefore, you can easily recognize beginning, body and end of the logs of the same invocation.
 ![Grouping AWS Lambda log](assets/screen1_1280x800.png)
 - Set font wieght of lines having `REPORT` and `[ERROR]` keywords to bold.
