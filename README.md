@@ -15,4 +15,11 @@ This extension doesn't collect any user and web page information. It only runs o
 
 Overhead is very low, colorize operation takes ~7 milliseconds, listen operation for new event logs takes just ~0.5 milliseconds in every second.
 
+### Contributions
 Contributions are welcome. Please follow the standart.js convention if you want to contribute.
+
+### Contributors
+- [@oguimbal](https://github.com/oguimbal)
+
+### Open Source
+- [ansi_up.js](http://github.com/drudru/ansi_up)
