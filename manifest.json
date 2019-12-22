@@ -1,7 +1,7 @@
 {
   "name": "Colorize CloudWatch Logs",
-  "description" : "Group visually logs on AWS CloudWatch",
-  "version": "0.3.7",
+  "description" : "Group logs visually on AWS CloudWatch",
+  "version": "0.3.8",
   "homepage_url": "https://github.com/ilhan-mstf/colorize_cloudwatch_logs",
   "manifest_version": 2,
   "icons": {
@@ -19,7 +19,7 @@
       "https://*.console.aws.amazon.com/cloudwatch/*"
     ],
     "js": [
-      "lib/ainsi_up.js",
+      "lib/ansi_up.js",
       "colorize.js"
     ]
   }]
