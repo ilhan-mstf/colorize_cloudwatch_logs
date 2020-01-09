@@ -1,7 +1,8 @@
 {
-  "name": "Colorize CloudWatch Logs",
-  "description" : "Easily recognize start and end of the same lambda event's logs.",
-  "version": "0.2.1",
+  "name": "Colorize AWS CloudWatch Logs",
+  "description" : "Group logs visually on AWS CloudWatch",
+  "version": "0.3.9",
+  "homepage_url": "https://github.com/ilhan-mstf/colorize_cloudwatch_logs",
   "manifest_version": 2,
   "icons": {
     "16": "img/logo_16.png",
@@ -18,7 +19,7 @@
       "https://*.console.aws.amazon.com/cloudwatch/*"
     ],
     "js": [
-      "lib/ainsi_up.js",
+      "lib/ansi_up.js",
       "colorize.js"
     ]
   }]

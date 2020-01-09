@@ -1,14 +1,25 @@
-Colorize Cloudwatch Logs
+Colorize CloudWatch Logs
 ========================
 
-This is a Google Chrome extension. You can install this extension from this address: [Chrome Web Store](https://chrome.google.com/webstore/detail/colorize-cloudwatch-logs/fkagnmcbeokmapmcbecbcmpccmlbhkpl).
+This is a Google Chrome extension. You can install this extension by this address: [Chrome Web Store](https://chrome.google.com/webstore/detail/colorize-cloudwatch-logs/fkagnmcbeokmapmcbecbcmpccmlbhkpl).
 
-The purpose of this extension is to recognize easily the boundaries of Amazon Lambda event's log by setting a different background color of logs belongs to the same event.
+The purpose of this extension is to group logs visually on AWS CloudWatch. There are three rules:
+- Set a different background color for each log group of AWS Lambda invocation. Therefore, you can easily recognize beginning, body and end of the logs of the same invocation.
+![Grouping AWS Lambda log](assets/screen1_1280x800.png)
+- Set font wieght of lines having `REPORT` and `[ERROR]` keywords to bold.
+![Bold REPORT and ERROR log](assets/bold.png)
+- Set color of ANSI terminal codes in the logs. (by [@oguimbal](https://github.com/oguimbal))
+![Colorized ANSI terminal codes](assets/screen3_1280x800.png)
 
-It doesn't collect any user data and it is free to use.
+This extension doesn't collect any user and web page information. It only runs on AWS CloudWatch Logs web page. It is free to use.
 
-This extension only runs on Amazon Cloudwatch Logs webpage.
+Overhead is very low, colorize operation takes ~7 milliseconds, listen operation for new event logs takes just ~0.5 milliseconds in every second.
 
-Overhead is very low, colorize operation takes 9 milliseconds, listen operation for new event logs takes 0.4 milliseconds in every second.
+### Contributions
+Contributions are welcome. Please follow the standart.js convention if you want to contribute.
 
-Contributions are welcome. Please obey standart.js convention if you are thinking to contribute.
+### Contributors
+- [@oguimbal](https://github.com/oguimbal)
+
+### Open Source
+- [ansi_up.js](http://github.com/drudru/ansi_up)

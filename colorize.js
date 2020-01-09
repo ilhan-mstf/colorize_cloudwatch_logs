@@ -1,24 +1,27 @@
 /*!
  * License: MIT
- * Author: Mustafa İlhan
- * http://ilhan-mstf.github.io/
+ * Author: Mustafa İlhan, http://ilhan-mstf.github.io/
+ * Contributors:
+ * - Olivier Guimbal, https://github.com/oguimbal
  */
 
 'use strict'
 
-let colors = ['#FFD54F', '#BCAAA4', '#90CAF9', '#FFCC80', '#FBE9E7', '#B0BEC5', '#DCE775', '#A5D6A7', '#81C784', '#9FA8DA', '#E0E0E0', '#CFD8DC', '#F48FB1', '#F8BBD0', '#F0F4C3', '#C0CA33', '#CE93D8', '#80CBC4', '#E1BEE7', '#CDDC39', '#C5CAE9', '#EF9A9A', '#FFFF00', '#B2EBF2', '#BDBDBD', '#FFE57F', '#B2DFDB', '#BBDEFB', '#69F0AE', '#FFCDD2', '#9CCC65', '#80DEEA', '#76FF03', '#B2FF59', '#C8E6C9']
+/* global AnsiUp */
 
-const ainsiTransform = new AnsiUp();
-delete window.AnsiUp; // just delete it so its hidden from global space
+const colors = ['#FFD54F', '#BCAAA4', '#90CAF9', '#FFCC80', '#FBE9E7', '#B0BEC5', '#DCE775', '#A5D6A7', '#81C784', '#9FA8DA', '#E0E0E0', '#CFD8DC', '#F48FB1', '#F8BBD0', '#F0F4C3', '#C0CA33', '#CE93D8', '#80CBC4', '#E1BEE7', '#CDDC39', '#C5CAE9', '#EF9A9A', '#FFFF00', '#B2EBF2', '#BDBDBD', '#FFE57F', '#B2DFDB', '#BBDEFB', '#69F0AE', '#FFCDD2', '#9CCC65', '#80DEEA', '#76FF03', '#B2FF59', '#C8E6C9']
+
+const ansiTransform = new AnsiUp()
+delete window.AnsiUp // just delete it so its hidden from global space
 
 
 function insertStylesheet() {
 
   // dont know why, but all "spans" that are insterted in cwdb-ellipsis are blinking
   // this class prevents that from happening
-  const style = document.createElement('style');
+const style = document.createElement('style');
   style.textContent = `
-  .classColorized span {
+.ansiColorized span {
     -webkit-animation-name: unset !important;
     -moz-animation-name: unset !important;
     -ms-animation-name: unset !important;
@@ -219,103 +222,140 @@ function refreshTail() {
   }
 }
 
-
-function colorizeElement (x, color) {
-  x.style.backgroundColor = color
-  x.className = x.className + ' cw-logs-colorized'
-  return x
+function isCheckedForColorized (element) {
+  return element.dataset.checkedForColorized !== 'yes'
 }
 
-function selectStartAndEnd (x) {
-  return selectStart(x) || selectEnd(x)
+function setCheckedForColorized (element) {
+  element.dataset.checkedForColorized = 'yes'
+  return element
 }
 
-function eliminateAlreadyColorizedOnes (x) {
-  return !x.className.includes('cw-logs-colorized')
+function isCheckedForBold (element) {
+  return element.dataset.checkedForBold !== 'yes'
 }
 
-/*
- * Gets event id from the html
- */
-function selectEventId (x) {
-  return x.innerHTML.replace(/\n/g, ' ').match(/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/g)[0]
+function setCheckedForBold (element) {
+  element.dataset.checkedForBold = 'yes'
+  return element
 }
 
-/*
- * Gets unique id list of events
- */
-function getIdList (x) {
-  return Array.from(new Set(x.filter(eliminateAlreadyColorizedOnes).filter(selectStartAndEnd).map(selectEventId)))
+function isStartLine (element) {
+  return element.innerHTML.includes('START RequestId:')
+}
+
+function isEndLine (element) {
+  return element.innerHTML.includes('REPORT RequestId:')
+}
+
+function isErrorLine (element) {
+  return element.innerHTML.includes('[ERROR]')
+}
+
+function isErrorOrEndLine (element) {
+  return isErrorLine(element) || isEndLine(element)
+}
+
+function isStartOrEnd (element) {
+  return isStartLine(element) || isEndLine(element)
+}
+
+function hasId (element, id) {
+  return element.innerHTML.includes(id)
+}
+
+function colorizeElement (element, color) {
+  element.style.backgroundColor = color
+  return element
+}
+
+function makeBoldElement (element) {
+  element.style.fontWeight = 600
+  return element
+}
+
+function makeBold (elements) {
+  elements
+    .filter(isCheckedForBold)
+    .map(setCheckedForBold)
+    .filter(isErrorOrEndLine)
+    .forEach(makeBoldElement)
+}
+
+function getEventId (element) {
+  return element
+    .innerHTML
+    .replace(/\n/g, ' ')
+    .match(/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/g)[0]
+}
+
+function getUniqueEventIds (eventIds) {
+  return Array.from(
+    new Set(
+      eventIds
+        .filter(isCheckedForColorized)
+        .map(setCheckedForColorized)
+        .filter(isStartOrEnd)
+        .map(getEventId)))
 }
 
 function colorizeGroup (elements) {
   let color = colors[Math.floor(Math.random() * colors.length)]
-  elements.map(x => colorizeElement(x, color))
+  elements.forEach(element => colorizeElement(element, color))
 }
 
-function colorizeAinsi (elements) {
+function colorizeGroups (elements) {
+  let eventIds = getUniqueEventIds(elements)
+  if (eventIds) {
+    eventIds.forEach(
+      id => colorizeGroup(elements.filter(element => hasId(element, id))))
+  }
+}
+
+function applyAnsiTransform (e) {
+  const txt = e.childNodes[0]
+  const textValue = txt.textContent || ''
+  if (/(^|\x1b)\[(\d+)m/.test(textValue)) {
+    e.classList.add('ansiColorized')
+    e.innerHTML = ansiTransform.ansi_to_html(textValue)
+  }
+}
+
+function colorizeAnsi (elements) {
   for (let e of elements) {
-    if (!e.classList.contains('classColorizedHandled')) {
-      e.classList.add('classColorizedHandled');
+    if (e.dataset.isAnsiColorizedHandled !== 'yes') {
+      e.dataset.isAnsiColorizedHandled = 'yes'
       if (e.childNodes.length !== 1 || e.childNodes[0].nodeType !== 3) {
-        continue; // expecting only one child text node
+        continue // expecting only one child text node
       }
-      const txt = e.childNodes[0];
-      const textValue = txt.textContent || '';
-      if (/(^|\x1b)\[(\d+)m/.test(textValue)) {
-        e.classList.add('classColorized');
-        const transformed = ainsiTransform.ansi_to_html(textValue);
-        e.innerHTML = transformed;
-      }
+      applyAnsiTransform(e)
     }
   }
 }
 
+function getElements () {
+  let elements = document.getElementsByClassName('cwdb-ellipsis')
+  return [].slice.call(elements)
+}
+
 function colorizeAll () {
   // console.time('cost-of-colorize')
-  let elements = document.getElementsByClassName('cwdb-ellipsis')
-  elements = [].slice.call(elements)
-  let idList = getIdList(elements)
-  if (idList) {
-    idList.map(id => colorizeGroup(elements.filter(x => x.innerHTML.includes(id))))
-  }
+  // console.time('cost-of-getting-elements')
+  const elements = getElements()
+  // console.timeEnd('cost-of-getting-elements')
 
-  colorizeAinsi(elements);
-  // console.timeEnd('cost-of-colorize')
+  // console.time('cost-of-colorize-groups')
+  colorizeGroups(elements)
+  // console.timeEnd('cost-of-colorize-groups')
+
+  // console.time('cost-of-colorize-ansi')
+  colorizeAnsi(elements)
+  // console.timeEnd('cost-of-colorize-ansi')
 
   // console.time('cost-of-bold')
   makeBold(elements)
   // console.timeEnd('cost-of-bold')
+  // console.timeEnd('cost-of-colorize')
 }
 
 setInterval(colorizeAll, 1000)
-
-function selectStart (x) {
-  return x.innerHTML.includes('START RequestId:')
-}
-
-function selectEnd (x) {
-  return x.innerHTML.includes('REPORT RequestId:')
-}
-
-function selectError (x) {
-  return x.innerHTML.includes('[ERROR]')
-}
-
-function selectEndAndError (x) {
-  return selectError(x) || selectEnd(x)
-}
-
-function makeBold (elements) {
-  elements.filter(selectEndAndError).filter(eliminateAlreadyBoldOnes).map(makeBoldElement)
-}
-
-function makeBoldElement (x) {
-  x.style.fontWeight = 600
-  x.className = x.className + ' bold-cw-logs'
-  return x
-}
-
-function eliminateAlreadyBoldOnes (x) {
-  return !x.className.includes('bold-cw-logs')
-}
