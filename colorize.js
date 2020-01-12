@@ -14,18 +14,213 @@ const colors = ['#FFD54F', '#BCAAA4', '#90CAF9', '#FFCC80', '#FBE9E7', '#B0BEC5'
 const ansiTransform = new AnsiUp()
 delete window.AnsiUp // just delete it so its hidden from global space
 
-// dont know why, but all "spans" that are insterted in cwdb-ellipsis are blinking
-// this class prevents that from happening
-const style = document.createElement('style')
-style.textContent = `
+
+function insertStylesheet() {
+
+  // dont know why, but all "spans" that are insterted in cwdb-ellipsis are blinking
+  // this class prevents that from happening
+const style = document.createElement('style');
+  style.textContent = `
 .ansiColorized span {
-  -webkit-animation-name: unset !important;
-  -moz-animation-name: unset !important;
-  -ms-animation-name: unset !important;
-  animation-name: unset !important;
+    -webkit-animation-name: unset !important;
+    -moz-animation-name: unset !important;
+    -ms-animation-name: unset !important;
+    animation-name: unset !important;
+  }
+
+  /* The container */
+  .container-checkbox {
+      display: block;
+      position: relative;
+      padding-left: 35px;
+      cursor: pointer;
+      font-size: 22px;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+  }
+
+  /* Hide the browser's default checkbox */
+  .container-checkbox input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+  }
+
+  /* Create a custom checkbox */
+  .container-checkbox .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 25px;
+      width: 25px;
+      background-color: #eee;
+  }
+
+  /* On mouse-over, add a grey background color */
+  .container-checkbox:hover input ~ .checkmark {
+      background-color: #ccc;
+  }
+
+  /* When the checkbox is checked, add a blue background */
+  .container-checkbox input:checked ~ .checkmark {
+      background-color: #2196F3;
+  }
+
+  /* Create the checkmark/indicator (hidden when not checked) */
+  .container-checkbox .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+  }
+
+  /* Show the checkmark when checked */
+  .container-checkbox input:checked ~ .checkmark:after {
+      display: block;
+  }
+
+  /* Style the checkmark/indicator */
+  .container-checkbox .checkmark:after {
+      left: 9px;
+      top: 5px;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 3px 3px 0;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
+  }
+
+
+
+  #logs-tweaker-panel {
+    position: fixed;
+    z-index: 1000000;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    padding: 5px;
+  }
+
+  .cwdb-log-viewer-table-container.fullscreen .cwdb-log-viewer-table-body {
+    position: fixed;
+    background: white;
+    margin-top: 0;
+    top: 40px;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    height: unset;
+  }
+  `
+  document.head.appendChild(style);
 }
-`
-document.head.appendChild(style)
+
+function insertTools() {
+
+  const panel = document.createElement('div');
+  panel.innerHTML = `<div id="logs-tweaker-panel">
+    <label class="container-checkbox"> Fullscreen
+      <input type="checkbox" id="logs-tweaker-fullscreen" ${fullscreenOn() ? 'checked="checked"' : ''}>
+      <span class="checkmark"></span>
+    </label>
+    <label class="container-checkbox"> Follow tail
+      <input type="checkbox" id="logs-tweaker-autorefresh" ${autorefreshOn() ? 'checked="checked"' : ''}>
+      <span class="checkmark"></span>
+    </label>
+  </div>`
+  document.body.append(panel);
+  // toggle fullscreen
+  document.getElementById('logs-tweaker-fullscreen').onchange = t => {
+    const { checked } = t.target;
+    if (checked) {
+      localStorage.setItem('logs-tweaker-fullscreen', 'yes');
+    } else {
+      localStorage.removeItem('logs-tweaker-fullscreen');
+    }
+    refreshFullscreen();
+  }
+
+  // toggle auto refresh
+  document.getElementById('logs-tweaker-autorefresh').onchange = t => {
+    const { checked } = t.target;
+    if (checked) {
+      localStorage.setItem('logs-tweaker-autorefresh', 'yes');
+    } else {
+      localStorage.removeItem('logs-tweaker-autorefresh');
+    }
+    refreshAutoRefresh();
+  }
+}
+
+// add "auto refresh" & "fullscreen"
+setInterval(() => {
+  refreshAutoRefresh();
+  refreshFullscreen();
+  if (document.getElementById('logs-tweaker-panel')) {
+    return;
+  }
+  insertStylesheet();
+  insertTools();
+}, 1000);
+
+function fullscreenOn() {
+  return !!localStorage.getItem('logs-tweaker-fullscreen')
+}
+
+let _fsOn = false;
+function refreshFullscreen() {
+  const elt = document.getElementsByClassName('cwdb-log-viewer-table-container')[0];
+  if (!elt) {
+    return;
+  }
+  if (fullscreenOn()) {
+    if (!elt.classList.contains('fullscreen')) {
+      elt.classList.add('fullscreen');
+    }
+  } else {
+    elt.classList.remove('fullscreen');
+  }
+}
+
+function autorefreshOn() {
+  return !!localStorage.getItem('logs-tweaker-autorefresh');
+}
+let autorefreshInterval = null;
+function refreshAutoRefresh() {
+  if (autorefreshOn()) {
+    if (!autorefreshInterval) {
+      autorefreshInterval = setInterval(refreshTail, 3000);
+      refreshTail();
+    }
+  } else {
+    clearInterval(autorefreshInterval);
+    autorefreshInterval = null;
+  }
+}
+
+function refreshTail() {
+  const refresh = document.getElementsByClassName('cwdb-log-viewer-table-infinite-loader-bottom')[0];
+  if (!refresh) {
+    return;
+  }
+  let a = refresh.firstElementChild;
+  while (a && a.tagName !== 'A') {
+    a = a.nextElementSibling;
+  }
+  if (a) {
+    a.click();
+    // scroll to bottom
+    const div = document.getElementsByClassName('cwdb-log-viewer-table-body')[0];
+    if (div) {
+      div.scrollTop = div.scrollHeight;
+    }
+  }
+}
 
 function isCheckedForColorized (element) {
   return element.dataset.checkedForColorized !== 'yes'
