@@ -11,9 +11,10 @@ The purpose of this extension is to group logs visually on AWS CloudWatch. There
 - Set color of ANSI terminal codes in the logs. (by [@oguimbal](https://github.com/oguimbal))
 ![Colorized ANSI terminal codes](assets/screen3_1280x800.png)
 
-Further, there is two functionality for better log viewing experience:
+Further, there is two functionality for better log viewing experience (by [@oguimbal](https://github.com/oguimbal)):
 - Switching to fullscreen,
 - Refreshing the logs periodically to load new items.
+![Fullscreen and Follow Tail](assets/screen5_1280x800.png)
 
 This extension doesn't collect any user and web page information. It only runs on AWS CloudWatch Logs web page. It is free to use.
 
