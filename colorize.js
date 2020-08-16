@@ -9,7 +9,11 @@
 
 /* global AnsiUp, localStorage */
 
-const colors = ['#FFD54F', '#BCAAA4', '#90CAF9', '#FFCC80', '#FBE9E7', '#B0BEC5', '#DCE775', '#A5D6A7', '#81C784', '#9FA8DA', '#E0E0E0', '#CFD8DC', '#F48FB1', '#F8BBD0', '#F0F4C3', '#C0CA33', '#CE93D8', '#80CBC4', '#E1BEE7', '#CDDC39', '#C5CAE9', '#EF9A9A', '#FFFF00', '#B2EBF2', '#BDBDBD', '#FFE57F', '#B2DFDB', '#BBDEFB', '#69F0AE', '#FFCDD2', '#9CCC65', '#80DEEA', '#76FF03', '#B2FF59', '#C8E6C9']
+const colors = ['#FFD54F', '#BCAAA4', '#90CAF9', '#FFCC80', '#FBE9E7', '#B0BEC5', '#DCE775', '#A5D6A7', '#81C784', '#9FA8DA', '#E0E0E0', '#CFD8DC', '#F48FB1', '#F8BBD0', '#F0F4C3', '#C0CA33', '#CE93D8', '#80CBC4', '#E1BEE7', '#CDDC39', '#C5CAE9', '#EF9A9A', '#FFFF00', '#B2EBF2', '#BDBDBD', '#FFE57F', '#B2DFDB', '#BBDEFB', '#69F0AE', '#FFCDD2', '#9CCC65', '#80DEEA', '#76FF03', '#B2FF59', '#C8E6C9'];
+const errorLevel = "level\":\"error";
+const infoLevel = "level\":\"info";
+const debugLevel = "level\":\"debug";
+
 
 const ansiTransform = new AnsiUp()
 delete window.AnsiUp // just delete it so its hidden from global space
@@ -271,6 +275,14 @@ function hasId (element, id) {
   return element.innerHTML.includes(id)
 }
 
+function isErrorLineGeneral (element) {
+  return element.innerHTML.toLowerCase().includes(errorLevel)
+}
+
+function isDebugOrInfo (element) {
+  return element.innerHTML.toLowerCase().includes(infoLevel) ||  element.innerHTML.toLowerCase().includes(debugLevel)
+}
+
 function colorizeElement (element, color) {
   element.style.backgroundColor = color
   return element
@@ -287,6 +299,22 @@ function makeBold (elements) {
     .map(setCheckedForBold)
     .filter(isErrorOrEndLine)
     .forEach(makeBoldElement)
+}
+
+function colorizeDebugOrInfoGeneral (elements) {
+  let color = colors[Math.floor(Math.random() * colors.length)]
+
+  elements
+    .filter(isDebugOrInfo)
+    .forEach(element => colorizeElement(element, color))
+}
+
+function colorizeErrorGeneral (elements) {
+  let color = '#FF4500'
+
+  elements
+    .filter(isErrorLineGeneral)
+    .forEach(element => colorizeElement(element, color))
 }
 
 function getEventId (element) {
@@ -354,6 +382,13 @@ function colorizeAll () {
   // console.time('cost-of-colorize-groups')
   colorizeGroups(elements)
   // console.timeEnd('cost-of-colorize-groups')
+
+
+  //  console.time('cost-of-general-logs')
+  colorizeDebugOrInfoGeneral(elements)
+  colorizeErrorGeneral(elements)
+
+  //  console.time('cost-of-general-logs')
 
   // console.time('cost-of-colorize-ansi')
   colorizeAnsi(elements)
