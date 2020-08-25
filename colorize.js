@@ -248,6 +248,15 @@ function setCheckedForGeneralColorized (element) {
   return element
 }
 
+function isCheckedForWarnColorized (element) {
+  return element.dataset.checkedForWarnColorized !== 'yes'
+}
+
+function setCheckedForWarnColorized (element) {
+  element.dataset.checkedForWarnColorized = 'yes'
+  return element
+}
+
 function isCheckedForBold (element) {
   return element.dataset.checkedForBold !== 'yes'
 }
@@ -297,7 +306,12 @@ function isErrorLineGeneral (element) {
 
 function isDebugOrInfo (element) {
   const text = element.innerHTML.toLowerCase()
-  return text.includes('info') ||  text.includes('debug') ||  text.includes('warn')
+  return text.includes('info') ||  text.includes('debug')
+}
+
+function isWarning (element) {
+  const text = element.innerHTML.toLowerCase()
+  return text.includes('warn')
 }
 
 function colorizeElement (element, color) {
@@ -319,7 +333,7 @@ function makeBold (elements) {
 }
 
 function colorizeDebugOrInfoGeneral (elements) {
-  let color = colors[Math.floor(Math.random() * colors.length)]
+  let color = '#ADD8E6'
 
   elements
     .filter(isCheckedForGeneralColorized)
@@ -328,8 +342,18 @@ function colorizeDebugOrInfoGeneral (elements) {
     .forEach(element => colorizeElement(element, color))
 }
 
+function colorizeWarnLevel (elements) {
+  let color = '#FFFCBB'
+
+  elements
+    .filter(isCheckedForWarnColorized)
+    .map(setCheckedForWarnColorized)
+    .filter(isWarning)
+    .forEach(element => colorizeElement(element, color))
+}
+
 function colorizeErrorGeneral (elements) {
-  let color = '#FF4500'
+  let color = '#FA8072'
 
   elements
     .filter(isCheckedForHighlightError)
@@ -408,7 +432,7 @@ function colorizeAll () {
   //  console.time('cost-of-general-logs')
   colorizeErrorGeneral(elements)
   colorizeDebugOrInfoGeneral(elements)
-
+  colorizeWarnLevel(elements)
   //  console.time('cost-of-general-logs')
 
   // console.time('cost-of-colorize-ansi')
