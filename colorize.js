@@ -414,7 +414,15 @@ function colorizeAnsi (elements) {
 }
 
 function getElements () {
-  let elements = document.getElementsByClassName('cwdb-ellipsis')
+  let elements;
+
+  const newDesign = document.querySelectorAll('iframe#microConsole-Logs')[0]
+  if (newDesign) {
+    elements = newDesign.contentDocument.getElementsByClassName('awsui-table-row')
+  } else {
+    elements = document.getElementsByClassName('cwdb-ellipsis')
+  }
+
   return [].slice.call(elements)
 }
 
@@ -429,11 +437,11 @@ function colorizeAll () {
   // console.timeEnd('cost-of-colorize-groups')
 
 
-  //  console.time('cost-of-general-logs')
-  colorizeErrorGeneral(elements)
-  colorizeDebugOrInfoGeneral(elements)
-  colorizeWarnLevel(elements)
-  //  console.time('cost-of-general-logs')
+  // console.time('cost-of-general-logs')
+  //colorizeErrorGeneral(elements)
+  //colorizeDebugOrInfoGeneral(elements)
+  //colorizeWarnLevel(elements)
+  // console.time('cost-of-general-logs')
 
   // console.time('cost-of-colorize-ansi')
   colorizeAnsi(elements)
