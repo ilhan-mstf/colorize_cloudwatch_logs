@@ -11,6 +11,7 @@
 
 const colors = ['#FFD54F', '#BCAAA4', '#90CAF9', '#FFCC80', '#FBE9E7', '#B0BEC5', '#DCE775', '#A5D6A7', '#81C784', '#9FA8DA', '#E0E0E0', '#CFD8DC', '#F48FB1', '#F8BBD0', '#F0F4C3', '#C0CA33', '#CE93D8', '#80CBC4', '#E1BEE7', '#CDDC39', '#C5CAE9', '#EF9A9A', '#FFFF00', '#B2EBF2', '#BDBDBD', '#FFE57F', '#B2DFDB', '#BBDEFB', '#69F0AE', '#FFCDD2', '#9CCC65', '#80DEEA', '#76FF03', '#B2FF59', '#C8E6C9']
 
+
 const ansiTransform = new AnsiUp()
 delete window.AnsiUp // just delete it so its hidden from global space
 
@@ -238,12 +239,39 @@ function setCheckedForColorized (element) {
   return element
 }
 
+function isCheckedForGeneralColorized (element) {
+  return element.dataset.checkedForGeneralColorized !== 'yes'
+}
+
+function setCheckedForGeneralColorized (element) {
+  element.dataset.checkedForGeneralColorized = 'yes'
+  return element
+}
+
+function isCheckedForWarnColorized (element) {
+  return element.dataset.checkedForWarnColorized !== 'yes'
+}
+
+function setCheckedForWarnColorized (element) {
+  element.dataset.checkedForWarnColorized = 'yes'
+  return element
+}
+
 function isCheckedForBold (element) {
   return element.dataset.checkedForBold !== 'yes'
 }
 
 function setCheckedForBold (element) {
   element.dataset.checkedForBold = 'yes'
+  return element
+}
+
+function isCheckedForHighlightError (element) {
+  return element.dataset.checkedForHighlightError !== 'yes'
+}
+
+function setCheckedForHighlightError (element) {
+  element.dataset.checkedForHighlightError = 'yes'
   return element
 }
 
@@ -271,6 +299,21 @@ function hasId (element, id) {
   return element.innerHTML.includes(id)
 }
 
+function isErrorLineGeneral (element) {
+  const text = element.innerHTML.toLowerCase()
+  return text.includes('error')
+}
+
+function isDebugOrInfo (element) {
+  const text = element.innerHTML.toLowerCase()
+  return text.includes('info') ||  text.includes('debug')
+}
+
+function isWarning (element) {
+  const text = element.innerHTML.toLowerCase()
+  return text.includes('warn')
+}
+
 function colorizeElement (element, color) {
   element.style.backgroundColor = color
   return element
@@ -287,6 +330,36 @@ function makeBold (elements) {
     .map(setCheckedForBold)
     .filter(isErrorOrEndLine)
     .forEach(makeBoldElement)
+}
+
+function colorizeDebugOrInfoGeneral (elements) {
+  let color = '#ADD8E6'
+
+  elements
+    .filter(isCheckedForGeneralColorized)
+    .map(setCheckedForGeneralColorized)
+    .filter(isDebugOrInfo)
+    .forEach(element => colorizeElement(element, color))
+}
+
+function colorizeWarnLevel (elements) {
+  let color = '#FFFCBB'
+
+  elements
+    .filter(isCheckedForWarnColorized)
+    .map(setCheckedForWarnColorized)
+    .filter(isWarning)
+    .forEach(element => colorizeElement(element, color))
+}
+
+function colorizeErrorGeneral (elements) {
+  let color = '#FA8072'
+
+  elements
+    .filter(isCheckedForHighlightError)
+    .map(setCheckedForHighlightError)
+    .filter(isErrorLineGeneral)
+    .forEach(element => colorizeElement(element, color))
 }
 
 function getEventId (element) {
@@ -354,6 +427,13 @@ function colorizeAll () {
   // console.time('cost-of-colorize-groups')
   colorizeGroups(elements)
   // console.timeEnd('cost-of-colorize-groups')
+
+
+  //  console.time('cost-of-general-logs')
+  colorizeErrorGeneral(elements)
+  colorizeDebugOrInfoGeneral(elements)
+  colorizeWarnLevel(elements)
+  //  console.time('cost-of-general-logs')
 
   // console.time('cost-of-colorize-ansi')
   colorizeAnsi(elements)
