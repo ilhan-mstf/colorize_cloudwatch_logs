@@ -3,6 +3,7 @@
  * Author: Mustafa İlhan, http://ilhan-mstf.github.io/
  * Contributors:
  * - Olivier Guimbal, https://github.com/oguimbal
+ * - Vikrant Sharma, https://github.com/svikrant2014
  */
 
 'use strict'
