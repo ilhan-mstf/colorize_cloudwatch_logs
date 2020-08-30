@@ -9,7 +9,7 @@
 
 /* global AnsiUp, localStorage */
 
-const colors = ['#FFD54F', '#BCAAA4', '#90CAF9', '#FFCC80', '#FBE9E7', '#B0BEC5', '#DCE775', '#A5D6A7', '#81C784', '#9FA8DA', '#E0E0E0', '#CFD8DC', '#F48FB1', '#F8BBD0', '#F0F4C3', '#C0CA33', '#CE93D8', '#80CBC4', '#E1BEE7', '#CDDC39', '#C5CAE9', '#EF9A9A', '#FFFF00', '#B2EBF2', '#BDBDBD', '#FFE57F', '#B2DFDB', '#BBDEFB', '#69F0AE', '#FFCDD2', '#9CCC65', '#80DEEA', '#76FF03', '#B2FF59', '#C8E6C9']
+const colors = ["#FCA17D", "#F9DBBD", "#ADFFE5", "#FFF399", "#CDC7E5", "#FCD0A1", "#F6A5A2", "#A3F7B5", "#D8B4E2", "#C4F4C7", "#C7FFDA", "#D9FFF8", "#E8E1EF", "#E6DBD0", "#FAFFD8", '#FFD54F', '#90CAF9', '#FFCC80', '#FBE9E7', '#B0BEC5', '#DCE775', '#A5D6A7', '#81C784', '#E0E0E0', '#CFD8DC', '#F48FB1', '#F8BBD0', '#F0F4C3', '#C0CA33', '#CE93D8', '#E1BEE7', '#CDDC39', '#C5CAE9', '#EF9A9A', '#FFFF00', '#B2EBF2', '#BDBDBD', '#FFE57F', '#B2DFDB', '#BBDEFB', '#69F0AE', '#FFCDD2', '#9CCC65', '#80DEEA', '#76FF03', '#B2FF59', '#C8E6C9']
 
 
 const ansiTransform = new AnsiUp()
@@ -284,7 +284,8 @@ function isEndLine (element) {
 }
 
 function isErrorLine (element) {
-  return element.innerHTML.includes('[ERROR]') || element.innerHTML.includes('[Error ')
+  const text = element.innerHTML.toLowerCase()
+  return text.includes('error')
 }
 
 function isErrorOrEndLine (element) {
@@ -380,7 +381,7 @@ function getUniqueEventIds (eventIds) {
 }
 
 function colorizeGroup (elements) {
-  let color = colors[Math.floor(Math.random() * colors.length)]
+  let color = colors[Math.floor((Math.random() * 10000)) % colors.length]
   elements.forEach(element => colorizeElement(element, color))
 }
 
