@@ -182,7 +182,7 @@ function removeTools() {
 
 // add "auto refresh" & "fullscreen"
 setInterval(() => {
-  if (window.location.hash.includes('#logEventViewer') || isNewDesign()) {
+  if (window.location.hash.includes('#logEventViewer')) {
     refreshAutoRefresh()
     refreshFullscreen()
     if (document.getElementById('logs-tweaker-panel')) {
