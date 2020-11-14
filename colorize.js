@@ -10,13 +10,12 @@
 
 /* global AnsiUp, localStorage */
 
-const colors = ["#FCA17D", "#F9DBBD", "#ADFFE5", "#FFF399", "#CDC7E5", "#FCD0A1", "#F6A5A2", "#A3F7B5", "#D8B4E2", "#C4F4C7", "#C7FFDA", "#D9FFF8", "#E8E1EF", "#E6DBD0", "#FAFFD8"]
-
+const colors = ['#FCA17D', '#F9DBBD', '#ADFFE5', '#FFF399', '#CDC7E5', '#FCD0A1', '#F6A5A2', '#A3F7B5', '#D8B4E2', '#C4F4C7', '#C7FFDA', '#D9FFF8', '#E8E1EF', '#E6DBD0', '#FAFFD8']
 
 const ansiTransform = new AnsiUp()
 delete window.AnsiUp // just delete it so its hidden from global space
 
-function insertStylesheet() {
+function insertStylesheet () {
   // dont know why, but all "spans" that are insterted in cwdb-ellipsis are blinking
   // this class prevents that from happening
   const style = document.createElement('style')
@@ -134,22 +133,39 @@ function insertStylesheet() {
   document.head.appendChild(style)
 }
 
-function insertTools() {
+function insertTools () {
   const panel = document.createElement('div')
-  let panelHtml = `<div id="logs-tweaker-panel">
+  let panelHtml = `<div id="logs-tweaker-panel">`
+  if (isNewDesign()) {
+    panelHtml = `${ panelHtml }
+    <label class="container-checkbox"> Replace Fonts
+      <input type="checkbox" id="logs-tweaker-fonts" ${ fontsOn() ? 'checked="checked"' : '' }>
+      <span class="checkmark"></span>
+    </label>
+  `
+  } else {
+    panelHtml = `${ panelHtml }
     <label class="container-checkbox"> Fullscreen
       <input type="checkbox" id="logs-tweaker-fullscreen" ${ fullscreenOn() ? 'checked="checked"' : '' }>
       <span class="checkmark"></span>
-    </label>`
-  panelHtml = `${ panelHtml }
+    </label>
     <label class="container-checkbox"> Follow tail
       <input type="checkbox" id="logs-tweaker-autorefresh" ${ autorefreshOn() ? 'checked="checked"' : '' }>
         <span class="checkmark"></span>
     </label>
   `
+  }
   panel.innerHTML = panelHtml + '</div>'
   document.body.append(panel)
 
+  if (isNewDesign()) {
+    setupNewToggles()
+  } else {
+    setupOldToggles()
+  }
+}
+
+function setupOldToggles () {
   // toggle fullscreen
   document.getElementById('logs-tweaker-fullscreen').onchange = t => {
     const { checked } = t.target
@@ -171,9 +187,23 @@ function insertTools() {
     }
     refreshAutoRefresh()
   }
+
 }
 
-function removeTools() {
+function setupNewToggles () {
+  // toggle replace fonts
+  document.getElementById('logs-tweaker-fonts').onchange = t => {
+    const { checked } = t.target
+    if (checked) {
+      localStorage.setItem('logs-tweaker-fonts', 'yes')
+    } else {
+      localStorage.removeItem('logs-tweaker-fonts')
+    }
+    refreshFonts()
+  }
+}
+
+function removeTools () {
   const element = document.getElementById('logs-tweaker-panel')
   if (element) {
     element.parentNode.removeChild(element)
@@ -182,24 +212,41 @@ function removeTools() {
 
 // add "auto refresh" & "fullscreen"
 setInterval(() => {
-  if (window.location.hash.includes('#logEventViewer')) {
-    refreshAutoRefresh()
-    refreshFullscreen()
+  if (window.location.hash.includes('#logEventViewer') || isNewDesign()) {
+    if (!isNewDesign()) {
+      refreshOldDesign()
+    } else {
+      refreshNewDesign()
+    }
     if (document.getElementById('logs-tweaker-panel')) {
       return
     }
     insertStylesheet()
-    if (!isNewDesign()) insertTools()
+    insertTools()
   } else {
     removeTools()
   }
 }, 1000)
 
-function fullscreenOn() {
+function refreshOldDesign () {
+  refreshAutoRefresh()
+  refreshFullscreen()
+}
+
+function refreshNewDesign () {
+  refreshAutoRefresh()
+  refreshFullscreen()
+}
+
+function fullscreenOn () {
   return !!localStorage.getItem('logs-tweaker-fullscreen')
 }
 
-function refreshFullscreen() {
+function fontsOn () {
+  return !!localStorage.getItem('logs-tweaker-fonts')
+}
+
+function refreshFullscreen () {
   const elt = document.getElementsByClassName('cwdb-log-viewer-table-container')[0]
   if (!elt) {
     return
@@ -213,13 +260,13 @@ function refreshFullscreen() {
   }
 }
 
-function autorefreshOn() {
+function autorefreshOn () {
   return !!localStorage.getItem('logs-tweaker-autorefresh')
 }
 
 let autorefreshInterval = null
 
-function refreshAutoRefresh() {
+function refreshAutoRefresh () {
   if (autorefreshOn()) {
     if (!autorefreshInterval) {
       autorefreshInterval = setInterval(refreshTail, 3000)
@@ -231,7 +278,27 @@ function refreshAutoRefresh() {
   }
 }
 
-function refreshTail() {
+function refreshFonts () {
+  const elements = getElements()
+  const eventIds = Array.from(
+    new Set(
+      elements
+        .filter(isStartOrEnd)
+        .map(getEventId)))
+  if (elements && eventIds) {
+    if (fontsOn()) {
+      eventIds.forEach(id => elements
+        .filter(element => hasId(element, id))
+        .forEach(element => changeFontElement(element, 'set')))
+    } else {
+      eventIds.forEach(id => elements
+        .filter(element => hasId(element, id))
+        .forEach(element => changeFontElement(element, 'clear')))
+    }
+  }
+}
+
+function refreshTail () {
   const refresh = document.getElementsByClassName('cwdb-log-viewer-table-infinite-loader-bottom')[0]
   if (!refresh) {
     return
@@ -250,118 +317,82 @@ function refreshTail() {
   }
 }
 
-function isCheckedForColorized(element) {
-  return element.dataset.checkedForColorized !== 'yes'
+function isCheckedForDecorated (element) {
+  return element.dataset.checkedForDecorated !== 'yes'
 }
 
-function setCheckedForColorized(element) {
-  element.dataset.checkedForColorized = 'yes'
+function setCheckedForDecorated (element) {
+  element.dataset.checkedForDecorated = 'yes'
   return element
 }
 
-function isCheckedForGeneralColorized(element) {
-  return element.dataset.checkedForGeneralColorized !== 'yes'
-}
-
-function setCheckedForGeneralColorized(element) {
-  element.dataset.checkedForGeneralColorized = 'yes'
-  return element
-}
-
-function isCheckedForWarnColorized(element) {
-  return element.dataset.checkedForWarnColorized !== 'yes'
-}
-
-function setCheckedForWarnColorized(element) {
-  element.dataset.checkedForWarnColorized = 'yes'
-  return element
-}
-
-function isCheckedForBold(element) {
+function isCheckedForBold (element) {
   return element.dataset.checkedForBold !== 'yes'
 }
 
-function setCheckedForBold(element) {
+function setCheckedForBold (element) {
   element.dataset.checkedForBold = 'yes'
   return element
 }
 
-function isCheckedForHighlightError(element) {
-  return element.dataset.checkedForHighlightError !== 'yes'
-}
-
-function setCheckedForHighlightError(element) {
-  element.dataset.checkedForHighlightError = 'yes'
-  return element
-}
-
-function isStartLine(element) {
+function isStartLine (element) {
   return element.innerHTML.includes('START RequestId:')
 }
 
-function isEndLine(element) {
+function isEndLine (element) {
   return element.innerHTML.includes('REPORT RequestId:')
 }
 
-function isErrorLine(element) {
+function isErrorLine (element) {
   const text = element.innerHTML.toLowerCase()
   return text.includes('error')
 }
 
-function isErrorOrEndLine(element) {
+function isErrorOrEndLine (element) {
   return isErrorLine(element) || isEndLine(element)
 }
 
-function isStartOrEnd(element) {
+function isStartOrEnd (element) {
   return isStartLine(element) || isEndLine(element)
 }
 
-function hasId(element, id) {
+function hasId (element, id) {
   return element.innerHTML.includes(id)
 }
 
-function isErrorLineGeneral(element) {
-  const text = element.innerHTML.toLowerCase()
-  return text.includes('error')
-}
-
-function isDebugOrInfo(element) {
-  const text = element.innerHTML.toLowerCase()
-  return text.includes('info') || text.includes('debug')
-}
-
-function isWarning(element) {
-  const text = element.innerHTML.toLowerCase()
-  return text.includes('warn')
-}
-
-function colorizeElement(element, color) {
+function colorizeElement (element, color) {
   element.style.backgroundColor = color
   return element
 }
 
-function changeFontElement(element) {
-  if (element.dataset.isFontHandled !== 'yes') {
+function changeFontElement (element, action = undefined) {
+  if (element.dataset.isFontHandled !== 'yes' || action) {
     element.dataset.isFontHandled = 'yes'
-    element.height = '20px';
-    element.lineHeight = '20px';
+    element.height = '20px'
+    element.lineHeight = '20px'
 
-    let subElements = element.getElementsByClassName('logs__log-events-table__cell');
+    let subElements = element.getElementsByClassName('logs__log-events-table__cell')
     for (let e of subElements) {
-      e.style.fontFamily = '"Helvetica Neue", Roboto, Arial, sans-serif';
-      e.style.fontSize = '0.9em';
-      e.style.paddingLeft = '5px';
+      if (action === 'clear') {
+        e.style.fontFamily = null;
+        e.style.fontSize = null;
+        e.style.paddingLeft = null;
+      } else {
+        e.style.fontFamily = '"Helvetica Neue", Roboto, Arial, sans-serif'
+        e.style.fontSize = '0.9em'
+        e.style.paddingLeft = '5px'
+      }
     }
   }
   return element
 }
 
-function makeBoldElement(element) {
+function makeBoldElement (element) {
   element.style.fontWeight = 600
   return element
 }
 
-function makeBold(elements) {
+function makeBold (elements) {
   elements
     .filter(isCheckedForBold)
     .map(setCheckedForBold)
@@ -369,75 +400,45 @@ function makeBold(elements) {
     .forEach(makeBoldElement)
 }
 
-function colorizeDebugOrInfoGeneral(elements) {
-  let color = '#ADD8E6'
-
-  elements
-    .filter(isCheckedForGeneralColorized)
-    .map(setCheckedForGeneralColorized)
-    .filter(isDebugOrInfo)
-    .forEach(element => colorizeElement(element, color))
-}
-
-function colorizeWarnLevel(elements) {
-  let color = '#FFFCBB'
-
-  elements
-    .filter(isCheckedForWarnColorized)
-    .map(setCheckedForWarnColorized)
-    .filter(isWarning)
-    .forEach(element => colorizeElement(element, color))
-}
-
-function colorizeErrorGeneral(elements) {
-  let color = '#FA8072'
-
-  elements
-    .filter(isCheckedForHighlightError)
-    .map(setCheckedForHighlightError)
-    .filter(isErrorLineGeneral)
-    .forEach(element => colorizeElement(element, color))
-}
-
-function getEventId(element) {
+function getEventId (element) {
   return element
     .innerHTML
     .replace(/\n/g, ' ')
     .match(/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/g)[0]
 }
 
-function getUniqueEventIds(eventIds) {
+function getUniqueEventIds (eventIds) {
   return Array.from(
     new Set(
       eventIds
-        .filter(isCheckedForColorized)
-        .map(setCheckedForColorized)
+        .filter(isCheckedForDecorated)
+        .map(setCheckedForDecorated)
         .filter(isStartOrEnd)
         .map(getEventId)))
 }
 
-function changeFontOnGroup(elements) {
+function changeFontOnGroup (elements) {
   elements.forEach(element => changeFontElement(element))
 }
 
-function colorizeGroup(elements) {
+function colorizeGroup (elements) {
   let color = colors[Math.floor((Math.random() * 10000)) % colors.length]
   elements.forEach(element => colorizeElement(element, color))
 }
 
-function decorateGroups(elements) {
+function decorateGroups (elements) {
   let eventIds = getUniqueEventIds(elements)
-  let newDesign = isNewDesign();
+  let newDesign = isNewDesign()
   if (eventIds) {
     eventIds.forEach(
       id => {
-        colorizeGroup(elements.filter(element => hasId(element, id)));
-        if (newDesign) changeFontOnGroup(elements.filter(element => hasId(element, id)));
+        colorizeGroup(elements.filter(element => hasId(element, id)))
+        if (newDesign && fontsOn()) changeFontOnGroup(elements.filter(element => hasId(element, id)))
       })
   }
 }
 
-function applyAnsiTransform(e) {
+function applyAnsiTransform (e) {
   const txt = e.childNodes[0]
   const textValue = txt.textContent || ''
   if (/(^|\x1b)\[(\d+)m/.test(textValue)) {
@@ -446,7 +447,7 @@ function applyAnsiTransform(e) {
   }
 }
 
-function colorizeAnsi(elements) {
+function colorizeAnsi (elements) {
   for (let e of elements) {
     if (e.dataset.isAnsiColorizedHandled !== 'yes') {
       e.dataset.isAnsiColorizedHandled = 'yes'
@@ -458,8 +459,8 @@ function colorizeAnsi(elements) {
   }
 }
 
-function getElements() {
-  let elements;
+function getElements () {
+  let elements
 
   const newDesignElements = document.querySelectorAll('iframe#microConsole-Logs')[0]
 
@@ -472,11 +473,11 @@ function getElements() {
   return [].slice.call(elements)
 }
 
-function isNewDesign() {
-  return window.location.hash.includes('#logsV2:log-groups/log-group') && window.location.hash.includes('/log-events/');
+function isNewDesign () {
+  return window.location.hash.includes('#logsV2:log-groups/log-group') && window.location.hash.includes('/log-events/')
 }
 
-function colorizeAll() {
+function colorizeAll () {
   // console.time('cost-of-colorize')
   // console.time('cost-of-getting-elements')
   const elements = getElements()
@@ -485,13 +486,6 @@ function colorizeAll() {
   // console.time('cost-of-colorize-groups')
   decorateGroups(elements)
   // console.timeEnd('cost-of-colorize-groups')
-
-
-  // console.time('cost-of-general-logs')
-  //colorizeErrorGeneral(elements)
-  //colorizeDebugOrInfoGeneral(elements)
-  //colorizeWarnLevel(elements)
-  // console.time('cost-of-general-logs')
 
   // console.time('cost-of-colorize-ansi')
   colorizeAnsi(elements)
