@@ -155,6 +155,7 @@ function insertTools () {
     </label>
   `
   }
+  
   panel.innerHTML = panelHtml + '</div>'
   document.body.append(panel)
 
