@@ -475,7 +475,7 @@ function getElements () {
 }
 
 function isNewDesign () {
-  return window.location.hash.includes('#logsV2:log-groups/log-group') && window.location.hash.includes('/log-events/')
+  return window.location.hash.includes('#logsV2:log-groups/log-group') && window.location.hash.includes('/log-events')
 }
 
 function colorizeAll () {
