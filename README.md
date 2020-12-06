@@ -26,6 +26,7 @@ Contributions are welcome. Please follow the standart.js convention if you want 
 ### Contributors
 - [@oguimbal](https://github.com/oguimbal)
 - [@svikrant2014](https://github.com/svikrant2014)
+- [@ktwbc](https://github.com/ktwbc)
 
 ### Open Source
 - [ansi_up.js](http://github.com/drudru/ansi_up)

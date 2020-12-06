@@ -4,13 +4,14 @@
  * Contributors:
  * - Olivier Guimbal, https://github.com/oguimbal
  * - Vikrant Sharma, https://github.com/svikrant2014
+ * - Kris Thom White, https://github.com/ktwbc
  */
 
 'use strict'
 
 /* global AnsiUp, localStorage */
 
-const colors = ['#FCA17D', '#F9DBBD', '#ADFFE5', '#FFF399', '#CDC7E5', '#FCD0A1', '#F6A5A2', '#A3F7B5', '#D8B4E2', '#C4F4C7', '#C7FFDA', '#D9FFF8', '#E8E1EF', '#E6DBD0', '#FAFFD8']
+const colors = ["#F9DBBD", "#CDC7E5", "#F6A5A2", "#FFF399", "#C4F4C7", "#E8E1EF", "#D9FFF8", "#ADFFE5", "#E6DBD0", "#C7FFDA", "#FCA17D", "#FCD0A1", "#FAFFD8", "#A3F7B5", "#D8B4E2"]
 
 const ansiTransform = new AnsiUp()
 delete window.AnsiUp // just delete it so its hidden from global space
@@ -281,22 +282,7 @@ function refreshAutoRefresh () {
 
 function refreshFonts () {
   const elements = getElements()
-  const eventIds = Array.from(
-    new Set(
-      elements
-        .filter(isStartOrEnd)
-        .map(getEventId)))
-  if (elements && eventIds) {
-    if (fontsOn()) {
-      eventIds.forEach(id => elements
-        .filter(element => hasId(element, id))
-        .forEach(element => changeFontElement(element, 'set')))
-    } else {
-      eventIds.forEach(id => elements
-        .filter(element => hasId(element, id))
-        .forEach(element => changeFontElement(element, 'clear')))
-    }
-  }
+  elements.forEach(element => changeFontElement(element, fontsOn() ? 'set' : 'clear'))
 }
 
 function refreshTail () {
@@ -366,7 +352,7 @@ function colorizeElement (element, color) {
   return element
 }
 
-function changeFontElement (element, action = undefined) {
+function changeFontElement (element, action) {
   if (element.dataset.isFontHandled !== 'yes' || action) {
     element.dataset.isFontHandled = 'yes'
     element.height = '20px'
@@ -419,7 +405,7 @@ function getUniqueEventIds (eventIds) {
 }
 
 function changeFontOnGroup (elements) {
-  elements.forEach(element => changeFontElement(element))
+  elements.forEach(changeFontElement)
 }
 
 function colorizeGroup (elements) {
@@ -434,17 +420,19 @@ function decorateGroups (elements) {
     eventIds.forEach(
       id => {
         colorizeGroup(elements.filter(element => hasId(element, id)))
-        if (newDesign && fontsOn()) changeFontOnGroup(elements.filter(element => hasId(element, id)))
+        if (newDesign && fontsOn()) changeFontOnGroup(elements)
       })
   }
 }
 
 function applyAnsiTransform (e) {
-  const txt = e.childNodes[0]
-  const textValue = txt.textContent || ''
-  if (/(^|\x1b)\[(\d+)m/.test(textValue)) {
-    e.classList.add('ansiColorized')
-    e.innerHTML = ansiTransform.ansi_to_html(textValue)
+  if (e) {
+    const txt = e.childNodes[0]
+    const textValue = txt.textContent || ''
+    if (/(^|\x1b)\[(\d+)m/.test(textValue)) {
+      e.classList.add('ansiColorized')
+      e.innerHTML = ansiTransform.ansi_to_html(textValue)
+    }
   }
 }
 
@@ -452,10 +440,7 @@ function colorizeAnsi (elements) {
   for (let e of elements) {
     if (e.dataset.isAnsiColorizedHandled !== 'yes') {
       e.dataset.isAnsiColorizedHandled = 'yes'
-      if (e.childNodes.length !== 1 || e.childNodes[0].nodeType !== 3) {
-        continue // expecting only one child text node
-      }
-      applyAnsiTransform(e)
+      applyAnsiTransform(e.getElementsByClassName("logs__log-events-table__cell")[1])
     }
   }
 }
