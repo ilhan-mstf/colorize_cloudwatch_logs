@@ -349,6 +349,11 @@ function hasId (element, id) {
 
 function colorizeElement (element, color) {
   element.style.backgroundColor = color
+
+  let subElements = element.getElementsByClassName("logs-table__body-cell")
+  for(let e of subElements){
+    colorizeElement(e,color)
+  }
   return element
 }
 
@@ -452,6 +457,9 @@ function getElements () {
 
   if (newDesignElements) {
     elements = newDesignElements.contentDocument.getElementsByClassName('awsui-table-row')
+    if(!elements.length){ //logs insights
+      elements = newDesignElements.contentDocument.getElementsByClassName('logs-table__body-row')
+    }
   } else {
     elements = document.getElementsByClassName('cwdb-ellipsis')
   }
